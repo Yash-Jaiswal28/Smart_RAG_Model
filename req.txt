@@ -5,3 +5,4 @@ langchain
 faiss-cpu 
 langchain_huggingface
 langchain-community
+langchain-groq 

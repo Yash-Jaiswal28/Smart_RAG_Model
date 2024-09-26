@@ -13,12 +13,16 @@ def app():
     if st.button("Send to FastAPI"):
         # Prepare the payload to send to FastAPI
         payload = {
-            "name": "Yash",
-            "description": "Jaiswal"
+            "name": name,
+            "description": description
         }
 
         # Send the POST request to FastAPI
-        response = requests.post("http://127.0.0.1:8000/items/", data=json.dumps(payload))
+        try:
+            response = requests.post("http://127.0.0.1:8000/items/", json=payload)  # Use json=payload
+        except requests.exceptions.RequestException as e:
+            st.error(f"Request failed: {str(e)}")
+            return
         
         # Display response from FastAPI
         if response.status_code == 200:

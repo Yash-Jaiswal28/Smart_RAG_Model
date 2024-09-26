@@ -4,7 +4,8 @@ import streamlit as st
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-
+import requests
+import json
 
 def extract_text_from_pdfs(pdf_files):
     """Extracts and concatenates text from multiple PDF files."""
@@ -68,14 +69,14 @@ def main():
                 st.session_state['raw_text'] = raw_text
                 # st.write(f"Extracted text length: {len(raw_text)} characters")
                 
-                # Split text into chunks
+                # Split text into chunks (if needed for any processing)
                 text_chunks = split_text_into_chunks(raw_text)
                 
                 if text_chunks:
                     st.session_state['text_chunks'] = text_chunks  # Store chunks in session state
                     # st.write("Sample Text Chunk 1:", text_chunks[0])
                 
-                # Create embeddings model and store vector store
+                # Create embeddings model and store vector store (if still needed)
                 embeddings_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-V2")
                 vector_store = create_vector_store_from_chunks(text_chunks, embeddings_model)
 
@@ -92,24 +93,28 @@ def main():
                 st.error("No text could be extracted from the uploaded PDFs.")
     
     # Ensure that we display text input only after PDFs have been processed
-    if 'vector_store' in st.session_state:
+    if 'raw_text' in st.session_state:
         query = st.text_input("Ask a question related to the PDF content")
 
         # Process the query when available
         if query:
             st.write(f"Query entered: {query}")
-            vector_store = st.session_state['vector_store']
-            response = vector_store.similarity_search(query)
-            
-            ind=1
-            for ans in response:
-                print(ans)
-                print()
-                print(ind)
-                print()
-                ind=ind+1
-            st.write(response)
 
+            # Instead of similarity search, send the full text
+            complete_text = st.session_state['raw_text']
+            payload = {
+                "query": query,
+                "context": complete_text  # Pass complete text to the API
+            }
+
+            if st.button("AI Answer"):
+                response = requests.post("http://127.0.0.1:8000/AI_Answer/", json=payload)
+
+                if response.status_code == 200:
+                    st.success(f"Response from FastAPI: {response.json()['message']}")
+                else:
+                    st.error(f"Failed to send data. Status code: {response.status_code}")
+    
 
 if __name__ == "__main__":
     main()
