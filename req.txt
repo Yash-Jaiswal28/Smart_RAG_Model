@@ -1,0 +1,7 @@
+streamlit
+fastapi uvicorn
+PyPDF2
+langchain 
+faiss-cpu 
+langchain_huggingface
+langchain-community
