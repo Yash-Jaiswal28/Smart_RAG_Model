@@ -114,7 +114,14 @@ def main():
                     st.success(f"Response from FastAPI: {response.json()['message']}")
                 else:
                     st.error(f"Failed to send data. Status code: {response.status_code}")
-    
+
+            if st.button("Smart AI Agent"):
+                response = requests.post("http://127.0.0.1:8000/Smart_AI_Answer/",json = payload)
+                if response.status_code == 200:
+                    st.success(f"Response from FastAPI: {response.json()['message']}")
+                else:
+                    st.error(f"Failed to send data. Status code: {response.status_code}")
+
 
 if __name__ == "__main__":
     main()
